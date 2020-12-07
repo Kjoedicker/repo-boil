@@ -63,7 +63,7 @@ func giteaPost(values map[string]string) string {
 	return cmd
 }
 
-// TODO: add on the fly github support
+// TODO(#1): add on the fly github support
 // func githubPost()
 
 func runcmd(cmd string, shell bool) []byte {
