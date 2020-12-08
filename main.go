@@ -40,7 +40,13 @@ func parseHosts(h *hosts) map[string]string {
 	parsed := make(map[string]string, len(h.Hosts))
 
 	for _, host := range h.Hosts {
-		parsed[host.Repo.Name] = fmt.Sprintf("%v%v", host.Repo.URL, host.Repo.Token)
+		if host.Repo.Name == "gitea" {
+			parsed[host.Repo.Name] = fmt.Sprintf("%v%v", host.Repo.URL, host.Repo.Token)
+		}
+
+		if host.Repo.Name == "github" {
+			parsed[host.Repo.Name] = fmt.Sprintf("%v %v", host.Repo.Token, host.Repo.URL)
+		}
 	}
 
 	return parsed
@@ -64,7 +70,22 @@ func giteaPost(values map[string]string) string {
 }
 
 // TODO(#1): add on the fly github support
-// func githubPost()
+func githubPost(values map[string]string) string {
+	url := parseHosts(getConf())
+
+	param := fmt.Sprintf(
+		`-d "{\"name\": \"%v\", \"description\": \"%v\",  \"private\": %v}"`,
+		values["name"],
+		values["description"],
+		values["private"])
+
+	cmd := fmt.Sprintf(
+		"curl  -u %v %v",
+		url["github"],
+		param)
+
+	return cmd
+}
 
 func runcmd(cmd string, shell bool) []byte {
 	if shell {
@@ -99,10 +120,12 @@ func main() {
 	switch os.Args[1] {
 	case "gitea":
 		cmd = giteaPost(values)
+	case "github":
+		cmd = githubPost(values)
 	default:
 		fmt.Println("No repo selected")
 		os.Exit(2)
 	}
-
+	fmt.Println(cmd)
 	runcmd(cmd, true)
 }
