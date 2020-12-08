@@ -69,7 +69,6 @@ func giteaPost(values map[string]string) string {
 	return cmd
 }
 
-// TODO(#1): add on the fly github support
 func githubPost(values map[string]string) string {
 	url := parseHosts(getConf())
 
