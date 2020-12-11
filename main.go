@@ -111,6 +111,7 @@ func runcmd(cmd string, shell bool) []byte {
 	return out
 }
 
+// TODO(#2): How can this be made more dynamic. In a way that repos don't have to be hardcoded, but rather, declared.
 func main() {
 	if len(os.Args) < 3 {
 		fmt.Println("Not enough arguments")
