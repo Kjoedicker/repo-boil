@@ -21,16 +21,20 @@ type hosts struct {
 }
 
 func getConf() (parsed *hosts) {
+	home := os.Getenv("HOME")
+	path := fmt.Sprintf("%v/.config/repo-boil/host.yaml", home)
 
-	buf, err := ioutil.ReadFile("host.yaml")
+	buf, err := ioutil.ReadFile(path)
 	if err != nil {
-		panic("host.yaml - not in path")
+		fmt.Println("host.yaml - not in path")
+		os.Exit(1)
 	}
 
 	conf := &hosts{}
 	err = yaml.Unmarshal(buf, conf)
 	if err != nil {
-		panic("getCred()")
+		fmt.Println("Invalid conf.yaml configuration")
+		os.Exit(1)
 	}
 
 	return conf
