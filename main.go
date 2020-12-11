@@ -52,38 +52,47 @@ func parseHosts(h *hosts) map[string]string {
 	return parsed
 }
 
-func giteaPost(values map[string]string) string {
-	url := parseHosts(getConf())
+func genValues() map[string]string {
+	values := make(map[string]string, len(os.Args))
+	arguments := []string{"name", "description", "private"}
 
-	param := fmt.Sprintf(
-		`-d "{ \"default_branch\": \"master\", \"description\": \"%v\", \"name\": \"%v\", \"private\": %v}"`,
-		values["description"],
-		values["name"],
-		values["private"])
+	for i := 2; i < len(os.Args); i++ {
+		values[arguments[i-2]] = os.Args[i]
+	}
 
-	cmd := fmt.Sprintf(
-		`curl -X POST "%v" -H "accept: application/json" -H "Content-Type: application/json" %v`,
-		url["gitea"],
-		param)
-
-	return cmd
+	return values
 }
 
-func githubPost(values map[string]string) string {
+func genTemplate(host string, cmd string, param string) string {
 	url := parseHosts(getConf())
+	values := genValues()
 
-	param := fmt.Sprintf(
-		`-d "{\"name\": \"%v\", \"description\": \"%v\",  \"private\": %v}"`,
+	parameter := fmt.Sprintf(
+		param,
 		values["name"],
 		values["description"],
 		values["private"])
 
-	cmd := fmt.Sprintf(
-		"curl  -u %v %v",
-		url["github"],
-		param)
+	command := fmt.Sprintf(
+		cmd,
+		url[host],
+		parameter)
 
-	return cmd
+	return command
+}
+
+func giteaPost() string {
+	cmd := `curl -X POST "%v" -H "accept: application/json" -H "Content-Type: application/json" %v`
+	param := `-d "{ \"default_branch\": \"master\", \"name\": \"%v\", \"description\": \"%v\", \"private\": %v}"`
+
+	return genTemplate("gitea", cmd, param)
+}
+
+func githubPost() string {
+	cmd := "curl  -u %v %v"
+	param := `-d "{\"name\": \"%v\", \"description\": \"%v\",  \"private\": %v}"`
+
+	return genTemplate("param", cmd, param)
 }
 
 func runcmd(cmd string, shell bool) []byte {
@@ -108,23 +117,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	values := make(map[string]string, len(os.Args))
-	arguments := []string{"name", "description", "private"}
-
-	for i := 2; i < len(os.Args); i++ {
-		values[arguments[i-2]] = os.Args[i]
-	}
-
 	var cmd string
 	switch os.Args[1] {
 	case "gitea":
-		cmd = giteaPost(values)
+		cmd = giteaPost()
 	case "github":
-		cmd = githubPost(values)
+		cmd = githubPost()
 	default:
 		fmt.Println("No repo selected")
 		os.Exit(2)
 	}
+
 	fmt.Println(cmd)
 	runcmd(cmd, true)
 }
