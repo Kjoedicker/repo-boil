@@ -96,7 +96,7 @@ func githubPost() string {
 	cmd := "curl  -u %v %v"
 	param := `-d "{\"name\": \"%v\", \"description\": \"%v\",  \"private\": %v}"`
 
-	return genTemplate("param", cmd, param)
+	return genTemplate("github", cmd, param)
 }
 
 func runcmd(cmd string, shell bool) []byte {
