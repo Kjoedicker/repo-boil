@@ -99,6 +99,7 @@ func githubPost() string {
 	return genTemplate("github", cmd, param)
 }
 
+// TODO(#3): doesn't provide any feedback for requests done on repos that happen to already exist
 func runcmd(cmd string, shell bool) []byte {
 	if shell {
 		out, err := exec.Command("bash", "-c", cmd).Output()
